@@ -1,0 +1,38 @@
+debug = false
+
+logLevel = "ERROR"
+defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      certFile = "/certs/fullchain.pem"
+      keyFile = "/certs/privkey.pem"
+
+[retry]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+watch = true
+exposedByDefault = false
+
+# This config is for developer laptop where Let's encrypt challenge 
+# will not work because behind NAT. Disabling acme section.
+# 
+# [acme]
+# email = "@EMAIL@"
+# storage = "acme.json"
+# entryPoint = "https"
+# onDemand = false
+# onHostRule = true
+# #    caServer = "https://acme-v02.api.letsencrypt.org/directory"
+# caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+#
+# [acme.httpChallenge]
+# entryPoint = "http"

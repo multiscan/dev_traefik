@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  whoami:
+    image: containous/whoami # A container that exposes an API to show its IP address
+    labels:
+      - "traefik.domain=dev.jkldsa.com"
+      - "traefik.frontend.rule=Host:whoami.dev.jkldsa.com"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+    expose:
+      - "80"
+    networks:
+      - traefik
+      - default
+
+networks:
+  traefik:
+    external: true
