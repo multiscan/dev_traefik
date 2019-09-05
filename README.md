@@ -19,6 +19,9 @@ So, if the domain is `jkldsa.com`, anything like `myapp.dev.jkldsa.com` will poi
 1. make sure that traefik is running: `make up`
 1. add labels and network to your app's `docker-compose.yml` file so that it can be added automatically to the list of services. See the example.
 
+## Generating wildcard certs with Let's Encrypt
+Use [companion project](https://github.com/multiscan/dev_traefik)
+
 ## Generating the wildcard certificate
 
 ```
