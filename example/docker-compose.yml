@@ -1,20 +1,74 @@
-version: '3'
+# https://containo.us/blog/traefik-2-0-docker-101-fc2893944b9d/
+# https://hub.docker.com/r/containous/whoami
+# This will create 5 identical whoami instances each with a different traefik 
+# frontend rule to show how to select based on domain name or on prefix path
+# curl 'https://whoami1.#{DEV_DOMAIN}/'    -> whoami1
+# curl 'https://whoami2.#{DEV_DOMAIN}/'    -> whoami2
+# curl 'https://whoami3.#{DEV_DOMAIN}/'    -> whoami3
+# curl 'https://whoami3.#{DEV_DOMAIN}/a/'  -> whoami4
+# curl 'https://whoami3.#{DEV_DOMAIN}/b/'  -> whoami5
 
+version: '3'
 services:
-  whoami:
-    image: containous/whoami # A container that exposes an API to show its IP address
+  whoami1:
+    image: containous/whoami
     labels:
-      - "traefik.domain=dev.jkldsa.com"
-      - "traefik.frontend.rule=Host:whoami.dev.jkldsa.com"
+      - "traefik.frontend.rule=Host:whoami1.${DEV_DOMAIN}"
       - "traefik.docker.network=traefik"
       - "traefik.enable=true"
       - "traefik.port=80"
-    expose:
-      - "80"
     networks:
       - traefik
       - default
 
+  whoami2:
+    image: containous/whoami
+    labels:
+      - "traefik.frontend.rule=Host:whoami2.${DEV_DOMAIN}"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+    networks:
+      - traefik
+      - default
+
+  whoami3:
+    image: containous/whoami
+    labels:
+      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN}"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+    networks:
+      - traefik
+      - default
+
+  whoami4:
+    image: containous/whoami
+    labels:
+      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN};PathPrefix:/a;PathPrefixStrip:/a/;"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+    networks:
+      - traefik
+      - default
+
+  whoami5:
+    image: containous/whoami
+    environment:
+      WHOAMI_NAME: whoami3_subpath_b
+    labels:
+      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN};PathPrefix:/b;PathPrefixStrip:/b/;"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+    networks:
+      - traefik
+      - default
+
+# An external network so the same traefik can be use for different project (all sharing ports 80,443)
+# This has to be created by hand otherwise the name is not correct
 networks:
   traefik:
     external: true
