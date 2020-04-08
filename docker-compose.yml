@@ -24,7 +24,7 @@ version: '3'
 services:
   proxy:
     image: traefik:1.7 # The official Traefik docker image
-    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    command: --logLevel=DEBUG --api --docker --web.metrics.prometheus=true --metrics.prometheus.buckets="0.1,0.3,1.2,5.0" # Enables the web UI and tells Traefik to listen to docker
     ports:
       - "80:80"     # The HTTP port
       - "443:443"
