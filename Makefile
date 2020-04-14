@@ -1,6 +1,6 @@
-CRTDIR ?= /keybase/private/multiscan/certbot/etc/live/dev.jkldsa.com/
-CERTS = certs/fullchain.pem certs/privkey.pem
 DEV_DOMAIN ?= dev.jkldsa.com
+CRTDIR ?= /keybase/private/multiscan/certbot/etc/live/$(DEV_DOMAIN)
+CERTS = certs/fullchain.pem certs/privkey.pem
 
 .PHONY: up
 up: $(CERTS) network
@@ -9,6 +9,7 @@ up: $(CERTS) network
 .PHONY: down
 down:
 	docker-compose down
+	rm -f $(CERTS)
 
 .PHONY: logs
 logs:
@@ -27,7 +28,7 @@ clean: down
 	docker network inspect traefik --format='{{ range $$key, $$value := .Containers}}{{ $$key }} {{ end }}' | xargs docker stop | xargs docker rm
 	docker network rm traefik
 
-$(CERTS): certs
+$(CERTS):
 	cp $(CRTDIR)/$(notdir $@) certs/
 
 certs:

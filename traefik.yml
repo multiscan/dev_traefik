@@ -7,7 +7,7 @@ api:
 providers:
   docker: {}
   file:
-    directory: /config
+    directory: /certs
     watch: true
 
 entryPoints:
@@ -19,17 +19,3 @@ entryPoints:
           to: https
   https:
     address: ":443"
-    # http:
-      # tls:
-      #   certResolver: default
-        # domains:
-        #   - main: dev.jkldsa.com
-        #     sans: "*.dev.jkldsa.com"
-      # middlewares:
-      #   - default-headers@file
-      # tls:
-      #   certResolver: cloudflare
-      #   domains:
-      #     - main: example.com
-      #       sans:
-      #         - "*.example.com"
