@@ -7,8 +7,15 @@
 # curl 'https://whoami3.#{DEV_DOMAIN}/'    -> whoami3
 # curl 'https://whoami3.#{DEV_DOMAIN}/a/'  -> whoami4
 # curl 'https://whoami3.#{DEV_DOMAIN}/b/'  -> whoami5
+# echo "ciao" | ncat --ssl echo.dev.jkldsa.com 9090  -> echo
+# echo "ciao" | ncat --ssl tr.dev.jkldsa.com 9090    -> trcase
+# # socat version does not work because it does not support SNI
+# # echo "ciao" | socat openssl:echo.dev.jkldsa.com:9090 stdio
+# # The non SSL version cannot work because HostSNI is an extension of the TLS protocol. 
+# # echo "ciao" | nc echo.#{DEV_DOMAIN} 9090 -> echo
+# # echo "ciao" | socat tcp:localhost:1234 stdio    
 # make down ; make up ; sleep 5; curl http://localhost:8080/api/rawdata | jq
-
+#
 version: '3'
 services:
   whoami1:
@@ -71,6 +78,33 @@ services:
     networks:
       - traefik
       - default
+
+  echo:
+    image: alpine/socat
+    command: -v tcp-l:1234,fork exec:'/bin/cat'
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.tcp.routers.echo.rule=HostSNI("echo.${DEV_DOMAIN}")
+      - traefik.tcp.services.echo.loadbalancer.server.port=1234
+      - traefik.tcp.routers.echo.tls=true
+      # - traefik.tcp.routers.echo.entryPoints=["other"] 
+    networks:
+      - traefik
+      - default
+
+  trcase:
+    image: alpine/socat
+    command: -v tcp-l:1234,fork exec:'tr a-z A-Z'
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.tcp.routers.tr.rule=HostSNI("tr.${DEV_DOMAIN}")
+      - traefik.tcp.services.tr.loadbalancer.server.port=1234
+      - traefik.tcp.routers.tr.tls=true
+      # - traefik.tcp.routers.echo.entryPoints=["other"] 
+    networks:
+      - traefik
+      - default
+
 
 # An external network so the same traefik can be use for different project (all sharing ports 80,443)
 # This has to be created by hand otherwise the name is not correct

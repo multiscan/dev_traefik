@@ -20,7 +20,7 @@ So, if the domain is `jkldsa.com`, anything like `myapp.dev.jkldsa.com` will poi
 1. add labels and network to your app's `docker-compose.yml` file so that it can be added automatically to the list of services. See the example.
 
 ## Generating wildcard certs with Let's Encrypt
-Use companion project [GandiLetsEncryptCertificates](https://github.com/multiscan/GandiLetsEncryptCertificates)
+Use companion project [GandiLetsEncryptCertificates][1]
 
 ## Generating the wildcard certificate
 
@@ -76,7 +76,20 @@ nsComment            = "OpenSSL Generated Certificate"
 ```
 
 
-## References
- * Regarding [certificate generation](https://jimfrenette.com/2018/03/ssl-certificate-authority-for-docker-and-traefik/)
- * https://www.sslshopper.com/article-most-common-openssl-commands.html
+## Links
+ - [Gandi & LE Certificate Generation][1]
+ - [Traefik 1.7 documentation][2]
+ - [Traefik 2.2 documentation][3]
+ - [Traefik and TLS HowTo blog post][4], [see also][5]
+ - [Discussion about ssh traffik with Traefik][6]
+ - [OpenSSL commands][7]
+ - [socat man page][8]
 
+[1]: https://github.com/multiscan/GandiLetsEncryptCertificates
+[2]: https://docs.traefik.io/v1.7/
+[3]: https://docs.traefik.io/v2.2/
+[4]: https://containo.us/blog/traefik-2-tls-101-23b4fbee81f1/
+[5]: https://jimfrenette.com/2018/03/ssl-certificate-authority-for-docker-and-traefik/
+[6]: https://community.containo.us/t/routing-ssh-traffic-with-traefik-v2/717/12
+[7]: https://www.sslshopper.com/article-most-common-openssl-commands.html
+[8]: https://linux.die.net/man/1/socat

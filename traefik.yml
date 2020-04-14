@@ -19,3 +19,5 @@ entryPoints:
           to: https
   https:
     address: ":443"
+  tcptls:
+    address: ":9090"
