@@ -1,0 +1,35 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  insecure: true
+providers:
+  docker: {}
+  file:
+    directory: /config
+    watch: true
+
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+  https:
+    address: ":443"
+    # http:
+      # tls:
+      #   certResolver: default
+        # domains:
+        #   - main: dev.jkldsa.com
+        #     sans: "*.dev.jkldsa.com"
+      # middlewares:
+      #   - default-headers@file
+      # tls:
+      #   certResolver: cloudflare
+      #   domains:
+      #     - main: example.com
+      #       sans:
+      #         - "*.example.com"

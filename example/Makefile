@@ -2,16 +2,23 @@ TRAEFIK_DIR ?= $(dir $(CURDIR))
 DEV_DOMAIN ?= dev.jkldsa.com
 
 up: traefik
-	DEV_DOMAIN=$(DEV_DOMAIN) docker-compose up -d
+	DEV_DOMAIN=$(DEV_DOMAIN) docker-compose up -d --scale whoami1=2
 
 down:
 	docker-compose down
+
+alldown:
+	docker-compose down
+	cd $(TRAEFIK_DIR) && make down
 
 ps:
 	docker-compose ps
 
 logs:
 	docker-compose logs -f
+
+tlogs:
+	cd $(TRAEFIK_DIR) && make logs
 
 test:
 	@curl -s 'https://whoami1.dev.jkldsa.com/'   | awk '/^Hostname:/{printf("whoami1: %s\n", $$2);}'

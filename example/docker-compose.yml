@@ -7,16 +7,19 @@
 # curl 'https://whoami3.#{DEV_DOMAIN}/'    -> whoami3
 # curl 'https://whoami3.#{DEV_DOMAIN}/a/'  -> whoami4
 # curl 'https://whoami3.#{DEV_DOMAIN}/b/'  -> whoami5
+# make down ; make up ; sleep 5; curl http://localhost:8080/api/rawdata | jq
 
 version: '3'
 services:
   whoami1:
     image: containous/whoami
     labels:
-      - "traefik.frontend.rule=Host:whoami1.${DEV_DOMAIN}"
-      - "traefik.docker.network=traefik"
-      - "traefik.enable=true"
-      - "traefik.port=80"
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami1.rule=Host("whoami1.${DEV_DOMAIN}")
+      - traefik.http.routers.whoami1.tls=true
+      - traefik.http.services.whoami1.loadbalancer.server.port=80
+      # - traefik.http.routers.whoami1.tls.certificates.certFile=/certs/fullchain.pem
+      # - traefik.http.routers.whoami1.tls.certificates.keyFile=/certs/privkey.pem
     networks:
       - traefik
       - default
@@ -24,10 +27,10 @@ services:
   whoami2:
     image: containous/whoami
     labels:
-      - "traefik.frontend.rule=Host:whoami2.${DEV_DOMAIN}"
-      - "traefik.docker.network=traefik"
-      - "traefik.enable=true"
-      - "traefik.port=80"
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami2.rule=Host("whoami2.${DEV_DOMAIN}")
+      - traefik.http.routers.whoami2.tls=true
+      - traefik.http.services.whoami2.loadbalancer.server.port=80
     networks:
       - traefik
       - default
@@ -35,10 +38,10 @@ services:
   whoami3:
     image: containous/whoami
     labels:
-      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN}"
-      - "traefik.docker.network=traefik"
-      - "traefik.enable=true"
-      - "traefik.port=80"
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami3.rule=Host("whoami3.${DEV_DOMAIN}")
+      - traefik.http.routers.whoami3.tls=true
+      - traefik.http.services.whoami3.loadbalancer.server.port=80
     networks:
       - traefik
       - default
@@ -46,10 +49,11 @@ services:
   whoami4:
     image: containous/whoami
     labels:
-      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN};PathPrefix:/a;PathPrefixStrip:/a/;"
-      - "traefik.docker.network=traefik"
-      - "traefik.enable=true"
-      - "traefik.port=80"
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami4.rule=Host("whoami3.${DEV_DOMAIN}") && PathPrefix("/a")
+      - traefik.http.routers.whoami4.tls=true
+      - traefik.http.services.whoami4.loadbalancer.server.port=80
+      - traefik.http.middlewares.strip_a.stripprefix.prefixes=/a/
     networks:
       - traefik
       - default
@@ -59,10 +63,11 @@ services:
     environment:
       WHOAMI_NAME: whoami3_subpath_b
     labels:
-      - "traefik.frontend.rule=Host:whoami3.${DEV_DOMAIN};PathPrefix:/b;PathPrefixStrip:/b/;"
-      - "traefik.docker.network=traefik"
-      - "traefik.enable=true"
-      - "traefik.port=80"
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami5.rule=Host("whoami3.${DEV_DOMAIN}") && PathPrefix("/b")
+      - traefik.http.routers.whoami5.tls=true
+      - traefik.http.services.whoami5.loadbalancer.server.port=80
+      - traefik.http.middlewares.strip_b.stripprefix.prefixes=/b/
     networks:
       - traefik
       - default

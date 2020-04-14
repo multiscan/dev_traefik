@@ -1,9 +1,10 @@
 CRTDIR ?= /keybase/private/multiscan/certbot/etc/live/dev.jkldsa.com/
 CERTS = certs/fullchain.pem certs/privkey.pem
+DEV_DOMAIN ?= dev.jkldsa.com
 
 .PHONY: up
 up: $(CERTS) network
-	docker-compose up -d
+	DEV_DOMAIN=$(DEV_DOMAIN) docker-compose up -d
 
 .PHONY: down
 down:
