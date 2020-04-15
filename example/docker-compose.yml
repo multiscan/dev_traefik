@@ -58,6 +58,7 @@ services:
     labels:
       - traefik.docker.network=traefik
       - traefik.http.routers.whoami4.rule=Host("whoami3.${DEV_DOMAIN}") && PathPrefix("/a")
+      - traefik.http.routers.whoami4.middlewares=strip_a
       - traefik.http.routers.whoami4.tls=true
       - traefik.http.services.whoami4.loadbalancer.server.port=80
       - traefik.http.middlewares.strip_a.stripprefix.prefixes=/a/
@@ -72,6 +73,7 @@ services:
     labels:
       - traefik.docker.network=traefik
       - traefik.http.routers.whoami5.rule=Host("whoami3.${DEV_DOMAIN}") && PathPrefix("/b")
+      - traefik.http.routers.whoami5.middlewares=strip_b
       - traefik.http.routers.whoami5.tls=true
       - traefik.http.services.whoami5.loadbalancer.server.port=80
       - traefik.http.middlewares.strip_b.stripprefix.prefixes=/b/
