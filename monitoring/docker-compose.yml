@@ -1,0 +1,31 @@
+version: '3'
+services:
+  prometheus:          # Prometheus service on port 9090
+    image: prom/prometheus
+    command:
+      - '--web.route-prefix=prometheus'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.external-url=http://traefik.${DEV_DOMAIN}/prometheus/'
+      # - '--storage.tsdb.path=/prometheus'
+
+    # command: --web.external-url http://traefik.${DEV_DOMAIN}/prometheus/
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
+    networks:
+      - traefik
+      - default
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.http.routers.tprom.rule=Host("traefik.${DEV_DOMAIN}") && PathPrefix("/prometheus")
+      - traefik.http.routers.tprom.tls=true
+      - traefik.http.services.tprom.loadbalancer.server.port=9090
+      # No need to strip because it is configured as route-prefix
+      # - traefik.http.routers.tprom.middlewares=tprom
+      # - traefik.http.middlewares.tprom.stripprefix.prefixes=/prometheus/
+
+# An external network so the same traefik can be use for different project (all sharing ports 80,443)
+# This has to be created by hand otherwise the name is not correct
+networks:
+  traefik:
+    external: true

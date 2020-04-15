@@ -2,6 +2,9 @@ global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
+log:
+  level: DEBUG
+
 api:
   insecure: true
 providers:
@@ -21,3 +24,15 @@ entryPoints:
     address: ":443"
   tcptls:
     address: ":9090"
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    # manualRouting: true
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5
+    # entryPoint: metrics

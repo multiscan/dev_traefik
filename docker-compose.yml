@@ -29,17 +29,20 @@ services:
       - "80:80"     # The HTTP port
       - "443:443"
       - "9090:9090" # The TCP/TLS Entry Point
-      - "8080:8080" # The Web UI (enabled by --api)
+      # - "8080:8080" # The Web UI (enabled by --api) moved to traefik.DEV_DOMAIN
     networks:
       - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
       - ./traefik.yml:/traefik.yml
       - ./certs:/certs
-    # labels:
-    #   - traefik.http.routers.rule=Host("traefik.${DEV_DOMAIN}")
-    #   - traefik.http.routers.traefik.service=api@internal
-    #   - traefik.http.routers.traefik.tls=true
+    labels:
+      - traefik.http.routers.traefik.rule=Host("traefik.${DEV_DOMAIN}")
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.metrics.rule=Host("traefik.${DEV_DOMAIN}") && PathPrefix("/metrics")
+      - traefik.http.routers.metrics.service=prometheus@internal
+      - traefik.http.routers.metrics.tls=true
     container_name: traefik
 
 # An external network so the same traefik can be use for different project (all sharing ports 80,443)
