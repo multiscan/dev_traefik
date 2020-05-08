@@ -3,15 +3,16 @@ services:
   prometheus:          # Prometheus service on port 9090
     image: prom/prometheus
     command:
-      - '--web.route-prefix=prometheus'
       - '--config.file=/etc/prometheus/prometheus.yml'
+# Next 2 lines are for accessing prometheus as a path of traefik. Note that
+#    this implies using http://prometheus:9090/prometheus as src in grafana
+      - '--web.route-prefix=prometheus'
       - '--web.external-url=http://traefik.${DEV_DOMAIN}/prometheus/'
-      # - '--storage.tsdb.path=/prometheus'
-
-    # command: --web.external-url http://traefik.${DEV_DOMAIN}/prometheus/
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./data/prometheus:/prometheus
+    expose:
+      - 9090
     networks:
       - traefik
       - default
@@ -20,9 +21,40 @@ services:
       - traefik.http.routers.tprom.rule=Host("traefik.${DEV_DOMAIN}") && PathPrefix("/prometheus")
       - traefik.http.routers.tprom.tls=true
       - traefik.http.services.tprom.loadbalancer.server.port=9090
-      # No need to strip because it is configured as route-prefix
-      # - traefik.http.routers.tprom.middlewares=tprom
-      # - traefik.http.middlewares.tprom.stripprefix.prefixes=/prometheus/
+
+  node_exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    # ports:
+    #   - 9100:9100
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+      #- "./data/grafana/conf/grafana.ini:/etc/grafana/grafana.ini"
+    networks:
+      - traefik
+      - default
+    labels:
+      - traefik.docker.network=traefik
+      # - traefik.http.routers.tgraph.rule=Host("traefik.${DEV_DOMAIN}") && PathPrefix("/grafana")
+      - traefik.http.routers.tgraph.rule=Host("system.${DEV_DOMAIN}")
+      - traefik.http.routers.tgraph.tls=true
+      - traefik.http.services.tgraph.loadbalancer.server.port=3000
 
 # An external network so the same traefik can be use for different project (all sharing ports 80,443)
 # This has to be created by hand otherwise the name is not correct

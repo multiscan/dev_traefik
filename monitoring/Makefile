@@ -1,7 +1,9 @@
 TRAEFIK_DIR ?= $(dir $(CURDIR))
 DEV_DOMAIN ?= dev.jkldsa.com
 
-up: traefik
+.PHONY: up down grafana ps logs traefik
+
+up: grafana traefik
 	DEV_DOMAIN=$(DEV_DOMAIN) docker-compose up -d
 
 down:
@@ -20,4 +22,14 @@ traefik: $(TRAEFIK_DIR)
 	@echo "Launching traefik  from $(TRAEFIK_DIR)"
 	cd $(TRAEFIK_DIR) && make up
 
-.PHONY: up down ps logs traefik
+
+# ---------------------------------------------------------------------- Grafana
+GPLUPATH = data/grafana/plugins
+GPLUGINS = grafana-piechart-panel
+
+grafana: $(addprefix $(GPLUPATH)/, $(GPLUGINS)) 
+	@echo "Grafana config is ok"
+
+$(GPLUPATH)/grafana-piechart-panel:
+	mkdir -p $$(dirname $@)
+	git clone https://github.com/grafana/piechart-panel.git --branch release-1.3.8 $@
