@@ -23,6 +23,8 @@ tlogs:
 test:
 	@curl -s 'https://whoami1.dev.jkldsa.com/'   | awk '/^Hostname:/{printf("whoami1: %s\n", $$2);}'
 	@curl -s 'https://whoami2.dev.jkldsa.com/'   | awk '/^Hostname:/{printf("whoami2: %s\n", $$2);}'
+	@curl -s 'https://whoami2a.dev.jkldsa.com/'  | awk '/^Hostname:/{printf("whoami2: %s\n", $$2);}'
+	@curl -s 'https://whoami2b.dev.jkldsa.com/'  | awk '/^Hostname:/{printf("whoami2: %s\n", $$2);}'
 	@curl -s 'https://whoami3.dev.jkldsa.com/'   | awk '/^Hostname:/{printf("whoami3: %s\n", $$2);}'
 	@curl -s 'https://whoami3.dev.jkldsa.com/a/' | awk '/^Hostname:/{printf("whoami4: %s\n", $$2);}'
 	@curl -s 'https://whoami3.dev.jkldsa.com/b/' | awk '/^Hostname:/{printf("whoami5: %s\n", $$2);}'
