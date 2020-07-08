@@ -1,0 +1,14 @@
+{
+  "name": "wssecho",
+  "version": "1.0.0",
+  "description": "Web socket echo server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Giovanni Cangiani",
+  "license": "GPL",
+  "dependencies": {
+    "ws": "^7.3.1"
+  }
+}

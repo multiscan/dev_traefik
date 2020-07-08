@@ -113,6 +113,17 @@ services:
       - traefik
       - default
 
+  wssecho:
+    build: wssecho
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.http.routers.wssecho.rule=Host("wssecho.${DEV_DOMAIN}")
+      - traefik.http.routers.wssecho.tls=true
+      - traefik.http.services.wssecho.loadbalancer.server.port=8080
+      - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto = https
+    networks:
+      - traefik
+      - default
 
 # An external network so the same traefik can be use for different project (all sharing ports 80,443)
 # This has to be created by hand otherwise the name is not correct
