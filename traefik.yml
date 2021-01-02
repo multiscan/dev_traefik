@@ -7,10 +7,11 @@ log:
 
 api:
   insecure: true
+
 providers:
   docker: {}
   file:
-    directory: /certs
+    directory: /config
     watch: true
 
 entryPoints:

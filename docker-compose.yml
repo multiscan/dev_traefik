@@ -36,6 +36,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
       - ./traefik.yml:/traefik.yml
       - ./certs:/certs
+      - ./config:/config
     labels:
       - traefik.http.routers.traefik.rule=Host("traefik.${DEV_DOMAIN}")
       - traefik.http.routers.traefik.service=api@internal
