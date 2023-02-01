@@ -9,10 +9,16 @@ api:
   insecure: true
 
 providers:
-  docker: {}
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
   file:
     directory: /config
     watch: true
+  # redis:
+  #   rootKey: "traefik"
+  #   endpoints:
+  #     - localhost:6379
+  #     # within the same pod, container share the network namespace (ip, ports etc)
 
 entryPoints:
   http:

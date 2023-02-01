@@ -3,3 +3,4 @@ config/
 acme.json
 *.pem
 .env
+podman.yml

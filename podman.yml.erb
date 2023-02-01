@@ -1,0 +1,90 @@
+<% 
+def realpath(f)
+  `realpath #{f}`.chomp
+end
+%>
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.kubernetes.cri-o.TTY/proxy: "false"
+    io.kubernetes.cri-o.TTY/redis: "false"
+    io.podman.annotations.autoremove/proxy: "FALSE"
+    io.podman.annotations.autoremove/redis: "FALSE"
+    io.podman.annotations.init/proxy: "FALSE"
+    io.podman.annotations.init/redis: "FALSE"
+    io.podman.annotations.privileged/proxy: "FALSE"
+    io.podman.annotations.privileged/redis: "FALSE"
+    io.podman.annotations.publish-all/proxy: "FALSE"
+    io.podman.annotations.publish-all/redis: "FALSE"
+  creationTimestamp: "2022-11-11T16:25:05Z"
+  labels:
+    app: proxy-pod
+  name: proxy-pod
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - args:
+    - --api.insecure=true
+    - --providers.docker
+    image: docker.io/library/traefik:v2.2
+    name: proxy
+    ports:
+    - containerPort: 80
+      hostPort: 80
+    - containerPort: 443
+      hostPort: 443
+    - containerPort: 9090
+      hostPort: 9090
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    volumeMounts:
+    - mountPath: /traefik.yml
+      name: traefik-config
+    - mountPath: /certs
+      name: traefik-certs
+    - mountPath: /config
+      name: traefik-dynamic-config
+  - args:
+    # do not persist to disk
+    - --save
+    - ""
+    - --appendonly
+    - "no"
+    image: docker.io/library/redis:7.0
+    name: redis
+    ports:
+    - containerPort: 6379
+      hostPort: 6379
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    volumeMounts:
+    - mountPath: /data
+      name: redis-data-vol
+  enableServiceLinks: false
+  volumes:
+  - hostPath:
+      path: <%= realpath ENV['PWD'] %>/traefik.yml
+      type: File
+    name: traefik-config
+  - hostPath:
+      path: <%= realpath ENV['PWD'] %>/certs
+      type: Directory
+    name: traefik-certs
+  - hostPath:
+      path: <%= realpath ENV['PWD'] %>/config
+      type: Directory
+    name: traefik-dynamic-config
+  - name: redis-data-vol
+    persistentVolumeClaim:
+      claimName: redis-data-vclaim
+

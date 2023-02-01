@@ -1,36 +1,66 @@
+-include .env
+export
 DEV_DOMAIN ?= dev.jkldsa.com
-DOMAINS ?= $(DEV_DOMAIN)
-KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
-CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
+DOMAINS ?= epfl.cz dev.jkldsa.com
+# KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
+# CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
+CRTDIR ?= /keybase/team/epfl_idevfsd/certs
 CERTS = $(addprefix certs/,$(DOMAINS))
 DYNCONFIGS = $(addprefix config/,$(addsuffix .yml,$(DOMAINS)))
 
+DOP ?= $(shell if which -s podman ; then echo "podman" ; else echo "docker" ; fi)
+
 all:
-	@echo $(DYNCONFIGS)
+	@echo "DOP: $(DOP)"	
+	@echo "DOMAINS: $(DOMAINS)"
+	@echo "CRTDIR: $(CRTDIR)"
+	@echo "DYNCONFIGS: $(DYNCONFIGS)"
 
 .PHONY: up down logs ps network clean
 
-up: $(CERTS) $(DYNCONFIGS) network
-	DEV_DOMAIN=$(DEV_DOMAIN) docker-compose up -d
+up: $(CERTS) $(DYNCONFIGS) config/traefik.yml podman.yml docker-compose.yml network
+ifeq ($(DOP),podman)
+	podman play kube podman.yml
+else
+	docker-compose up -d
+endif
 
-down:
+down: podman.yml
+ifeq ($(DOP),podman)
+	podman play kube podman.yml --down
+else
 	docker-compose down
+endif
 	rm -rf $(CERTS)
 
 logs:
+ifeq ($(DOP),docker)
 	docker-compose logs -f
+endif
 
 ps:
+ifeq ($(DOP),podman)
+	podman ps
+else
 	docker-compose ps
+endif
+
+console:
+	docker-compose exec proxy /bin/sh
 
 network:
+ifeq ($(DOP),docker)
 	docker network ls --format "{{.ID}} {{.Name}}" --filter "name=traefik"  | grep -q ' traefik$$' || docker network create --subnet=192.168.129.0/24 traefik
+endif
 
 clean: down
+ifeq ($(DOP),docker)
 	docker network inspect traefik --format='{{ range $$key, $$value := .Containers}}{{ $$key }} {{ end }}' | xargs docker stop | xargs docker rm
 	docker network rm traefik
+endif
 
 $(CERTS): certs
+	echo "CERT: $@   $(CRTDIR)/$(notdir $@)   -> certs/"
 	cp -RL $(CRTDIR)/$(notdir $@) certs/
 
 $(DYNCONFIGS): config
@@ -44,3 +74,12 @@ certs:
 
 config:
 	mkdir -p $@
+
+podman.yml: podman.yml.erb
+	erb -T 2 $< >$@
+
+docker-compose.yml: docker-compose.yml.erb
+	erb -T 2 $< >$@
+
+config/traefik.yml: service.yml.erb
+	erb -T 2 $< >$@
