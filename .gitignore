@@ -4,3 +4,4 @@ acme.json
 *.pem
 .env
 podman.yml
+docker-compose.yml
