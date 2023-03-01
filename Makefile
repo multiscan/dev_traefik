@@ -2,7 +2,7 @@
 export
 DEV_DOMAIN ?= dev.jkldsa.com
 DOMAINS ?= epfl.cz dev.jkldsa.com
-MKCERT_DOMAINS ?= epfl.local
+MKCERT_DOMAINS ?= local
 # KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
 # CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
 CRTDIR ?= /keybase/team/epfl_idevfsd/certs
