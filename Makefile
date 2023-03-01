@@ -2,10 +2,11 @@
 export
 DEV_DOMAIN ?= dev.jkldsa.com
 DOMAINS ?= epfl.cz dev.jkldsa.com
+MKCERT_DOMAINS ?= epfl.local
 # KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
 # CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
 CRTDIR ?= /keybase/team/epfl_idevfsd/certs
-CERTS = $(addprefix certs/,$(DOMAINS))
+CERTS = $(addprefix certs/,$(DOMAINS)) $(addprefix certs/,$(MKCERT_DOMAINS))
 DYNCONFIGS = $(addprefix config/,$(addsuffix .yml,$(DOMAINS)))
 
 DOP ?= $(shell if which -s podman ; then echo "podman" ; else echo "docker" ; fi)
@@ -13,6 +14,7 @@ DOP ?= $(shell if which -s podman ; then echo "podman" ; else echo "docker" ; fi
 all:
 	@echo "DOP: $(DOP)"	
 	@echo "DOMAINS: $(DOMAINS)"
+	@echo "MKCERT_DOMAINS: $(MKCERT_DOMAINS)"
 	@echo "CRTDIR: $(CRTDIR)"
 	@echo "DYNCONFIGS: $(DYNCONFIGS)"
 
@@ -60,8 +62,16 @@ ifeq ($(DOP),docker)
 endif
 
 $(CERTS): certs
-	echo "CERT: $@   $(CRTDIR)/$(notdir $@)   -> certs/"
-	cp -RL $(CRTDIR)/$(notdir $@) certs/
+	src=$(CRTDIR)/$(notdir $@);\
+	if [ -d $$src ] ; then\
+		echo "CERT: $@   $$src   -> certs/";\
+		cp -RL $$src certs/;\
+	else\
+		mkdir $@;\
+		mkcert --cert-file $@/fullchain.pem --key-file $@/privkey.pem "*.$(notdir $@)";\
+	fi
+
+
 
 $(DYNCONFIGS): config
 	@echo "tls:" > $@
