@@ -1,83 +1,42 @@
 # Generic Traefik container for local development
 
+### One traefik for all your dev apps
+
 This repository is to demonstrate how to use the `external` network specification in `docker-compose` to enable communication between containers defined in different compositions. It also uses the nice auto-discover capabilities of traefik respond to all services that require it without having to touch anything in this directory.
 
-Since this is meant for local development machine which is not reacheable from the internet, I cannot use the great feature of traefik of generating the _acme_ certificates from Let's encrypt. Therefore only the self-generated certificates are available.
+## How to use it
 
-## How I use it
-In order to avoid having to generate a certificate for every single service, I use a valid wildcard certificate for a subdomain (_e.g._ `dev`) that is configured to point anything to `127.0.0.1`. This is done by adding the following line to the DNS record of the domain:
+### DNS
+Traefik forward traffic to services based on their hostnames. Since it listens to a local address, there must be a name resolution for the browser to reach the traefik proxy and the various backends. This can be done in three ways:
+ 1. change your `/etc/hosts` file so that the desired name is resolved to localhost: 
+    ```
+    127.0.0.1    www.example.com
+    ```
+    This is the only option if you don't have access to the DNS for the domain you intend to use;
+ 1. use a domain that is resolved as localhost by default such as `mywebapp.local`;
+ 1. redirect all your domain (or a subdomain) to localhost in the dns of your domain. A line like the following will redirect any request in the subdomain `dev` to localhost. For example, if your domain were `example.com`, then `mywebapp.dev.example.com` would be resolved to localhost.
+     ```
+     *.dev 1800 IN A 127.0.0.1
+     ```
 
-```
-*.dev 1800 IN A 127.0.0.1
-```
+### SSL Certificates
+For **local domains**, the only choice is to auto-generate the certificates. Best option is therefore to use mkcert (see below).
 
-So, if the domain is `jkldsa.com`, anything like `myapp.dev.jkldsa.com` will point to localhost and reach traefik. Since the certificate is valid forr all hosts in the `*.dev.jkldsa.com`, traefik will not have to generate a new one and you will avoid complains from the browser.
+For **global domains**, we cannot use the great feature of traefik of generating the _acme_ certificates from Let's encrypt because the dev machine is not reacheable from the internet. However, there are still two viable options that do not require generating a certificate for each service:
+
+ 1. Official wildcard certificates: generate a certificate for your `dev` subdomain and store it in a subdirectory of your `CRTDIR`. I do this using the procedure described [here][1] which uses Let's encrypt and works nicely (and free of charge) for domains registered with gandi.net. The list of subdomains that you want traefik to be aware of have to be listed in the `DOMAINS` environment variable. So, if the domain is `jkldsa.com`, anything like `myapp.dev.jkldsa.com` will point to localhost and reach traefik. Since the certificate is valid forr all hosts in the `*.dev.jkldsa.com`, traefik will not have to generate a new one and you will avoid complains from the browser.
+ 1. Use [mkcert][9] to generate cerificates on the fly for the sub-domains you intend to use. In this case, all you have to do is to list the domains in the `MKCERT_DOMAINS` environment variable. 
 
 ## Configuration
 
-1. provide a directory with a valid wildcard certificate and key as the `CRTDIR` env variable 
-1. make sure that traefik is running: `make up`
+1. provide a directory with a valid wildcard certificate and key as the `CRTDIR` env variable;
+1. provide `DOMAINS` andd `MKCERT_DOMAINS` environment variables listing the domains you want to use;
+1. make sure that traefik is running: `make up`;
 1. add labels and network to your app's `docker-compose.yml` file so that it can be added automatically to the list of services. See the example.
-
-## Generating wildcard certs with Let's Encrypt
-Use companion project [GandiLetsEncryptCertificates][1]
-
-## Generating the wildcard certificate
-
-```
-#
-# Use this to generate self-signed cert
-# openssl req -config cert.conf -new -x509 -sha256 -newkey rsa:2048 -nodes -keyout pippo.key.pem -days 365 -out pippo.cert.pem
-# 
-[ req ]
-default_bits        = 2048
-default_keyfile     = keyfile.pem
-distinguished_name  = req_distinguished_name
-req_extensions      = req_ext
-x509_extensions     = x509_ext
-string_mask         = utf8only
-prompt              = no
-
-# The Subject DN can be formed using X501 or RFC 4514 (see RFC 4519 for a description).
-#   Its sort of a mashup. For example, RFC 4514 does not provide emailAddress.
-[ req_distinguished_name ]
-countryName         = CH
-stateOrProvinceName = VD
-localityName        = Lausanne
-organizationName    = EPFL
-commonName          = Giovanni Cangiani - EPFL
-emailAddress        = giovanni.cangiani@epfl.ch
-
-# Section x509_ext is used when generating a self-signed certificate. I.e., openssl req -x509 ...
-[ x509_ext ]
-
-subjectKeyIdentifier    = hash
-authorityKeyIdentifier  = keyid,issuer
-
-# You only need digitalSignature below. *If* you don't allow
-#   RSA Key transport (i.e., you use ephemeral cipher suites), then
-#   omit keyEncipherment because that's key transport.
-basicConstraints = CA:FALSE
-keyUsage         = digitalSignature, keyEncipherment
-nsComment        = "OpenSSL Generated Certificate"
-# subjectAltName   = @alternate_names
-
-# Section req_ext is used when generating a certificate signing request. I.e., openssl req ...
-[ req_ext ]
-subjectKeyIdentifier = hash
-basicConstraints     = CA:FALSE
-keyUsage             = digitalSignature, keyEncipherment
-# subjectAltName       = @alternate_names
-nsComment            = "OpenSSL Generated Certificate"
-
-# [ alternate_names ]
-# DNS.1 = idevelopsrv24.epfl.ch
-# DNS.2 = idev-fsd-redmine.epfl.ch
-```
-
 
 ## Links
  - [Gandi & LE Certificate Generation][1]
+ - [mkcert][9]
  - [Traefik 1.7 documentation][2]
  - [Traefik 2.2 documentation][3]
  - [Traefik and TLS HowTo blog post][4], [see also][5]
@@ -93,3 +52,4 @@ nsComment            = "OpenSSL Generated Certificate"
 [6]: https://community.containo.us/t/routing-ssh-traffic-with-traefik-v2/717/12
 [7]: https://www.sslshopper.com/article-most-common-openssl-commands.html
 [8]: https://linux.die.net/man/1/socat
+[9]: https://github.com/FiloSottile/mkcert
