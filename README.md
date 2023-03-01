@@ -7,20 +7,19 @@ This repository is to demonstrate how to use the `external` network specificatio
 ## How to use it
 
 ### DNS
-Traefik forward traffic to services based on their hostnames. Since it listens to a local address, there must be a name resolution for the browser to reach the traefik proxy and the various backends. This can be done in three ways:
+Traefik forward traffic to services based on their hostnames. Since it listens to a local address, there must be a name resolution for the browser to reach the traefik proxy and the various backends. This can be done in two ways:
  1. change your `/etc/hosts` file so that the desired name is resolved to localhost: 
     ```
     127.0.0.1    www.example.com
     ```
-    This is the only option if you don't have access to the DNS for the domain you intend to use;
- 1. use a domain that is resolved as localhost by default such as `mywebapp.local`;
+    This is the only option if you don't have access to the DNS for the domain you intend to use. If you have [dnsmasq][10] installed you can probably assign full subdomains like `*.dev.local` to `localhost` (not tested in person at least recently). 
  1. redirect all your domain (or a subdomain) to localhost in the dns of your domain. A line like the following will redirect any request in the subdomain `dev` to localhost. For example, if your domain were `example.com`, then `mywebapp.dev.example.com` would be resolved to localhost.
      ```
      *.dev 1800 IN A 127.0.0.1
      ```
 
 ### SSL Certificates
-For **local domains**, the only choice is to auto-generate the certificates. Best option is therefore to use mkcert (see below).
+For **local domains** like `mywebapp.local`, the only choice is to auto-generate the certificates. The good thing is that browsers are more relaxed regarding validity of the certificate in this case. Still the easiest option is to use [mkcert][9] automatically as explained below.
 
 For **global domains**, we cannot use the great feature of traefik of generating the _acme_ certificates from Let's encrypt because the dev machine is not reacheable from the internet. However, there are still two viable options that do not require generating a certificate for each service:
 
@@ -53,3 +52,4 @@ For **global domains**, we cannot use the great feature of traefik of generating
 [7]: https://www.sslshopper.com/article-most-common-openssl-commands.html
 [8]: https://linux.die.net/man/1/socat
 [9]: https://github.com/FiloSottile/mkcert
+[10]: https://thekelleys.org.uk/dnsmasq/doc.html
