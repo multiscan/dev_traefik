@@ -5,6 +5,8 @@ global:
 log:
   level: DEBUG
 
+# accesslog:
+
 api:
   insecure: true
 

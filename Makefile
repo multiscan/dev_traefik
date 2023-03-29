@@ -16,6 +16,7 @@ all:
 	@echo "DOMAINS: $(DOMAINS)"
 	@echo "MKCERT_DOMAINS: $(MKCERT_DOMAINS)"
 	@echo "CRTDIR: $(CRTDIR)"
+	@echo "CERTS: $(CERTS)"
 	@echo "DYNCONFIGS: $(DYNCONFIGS)"
 
 .PHONY: up down logs ps network clean
@@ -63,14 +64,14 @@ endif
 
 $(CERTS): certs
 	src=$(CRTDIR)/$(notdir $@);\
-	if [ -d $$src ] ; then\
+	echo "src=$$src";\
+	if keybase fs stat $$src 2>/dev/null | cut -f 2 | grep -q DIR ; then \
 		echo "CERT: $@   $$src   -> certs/";\
-		cp -RL $$src certs/;\
-	else\
+		keybase fs cp -r $$src $(dir $@)/;\
+	else \
 		mkdir $@;\
 		mkcert --cert-file $@/fullchain.pem --key-file $@/privkey.pem "*.$(notdir $@)";\
 	fi
-
 
 
 $(DYNCONFIGS): config
