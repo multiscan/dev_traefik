@@ -66,8 +66,13 @@ $(CERTS): certs
 	src=$(CRTDIR)/$(notdir $@);\
 	echo "src=$$src";\
 	if keybase fs stat $$src 2>/dev/null | cut -f 2 | grep -q DIR ; then \
-		echo "CERT: $@   $$src   -> certs/";\
-		keybase fs cp -r $$src $(dir $@)/;\
+		if [ -d $@ ] ; then \
+			echo "Certs dir for $@ is already present. Skipping but this will possibly end up in expired certs";\
+		else \
+			echo "CERT: $@   $$src   -> certs/";\
+			echo keybase fs cp -r $$src $(dir $@)/;\
+			keybase fs cp -r $$src $(dir $@)/;\
+		fi \
 	else \
 		mkdir $@;\
 		mkcert --cert-file $@/fullchain.pem --key-file $@/privkey.pem "*.$(notdir $@)";\
