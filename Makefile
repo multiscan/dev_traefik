@@ -25,31 +25,31 @@ up: $(CERTS) $(DYNCONFIGS) config/traefik.yml podman.yml docker-compose.yml netw
 ifeq ($(DOP),podman)
 	podman play kube podman.yml
 else
-	docker-compose up -d
+	docker compose up -d
 endif
 
 down: podman.yml
 ifeq ($(DOP),podman)
 	podman play kube podman.yml --down
 else
-	docker-compose down
+	docker compose down
 endif
 	rm -rf $(CERTS)
 
 logs:
 ifeq ($(DOP),docker)
-	docker-compose logs -f
+	docker compose logs -f
 endif
 
 ps:
 ifeq ($(DOP),podman)
 	podman ps
 else
-	docker-compose ps
+	docker compose ps
 endif
 
 console:
-	docker-compose exec proxy /bin/sh
+	docker compose exec proxy /bin/sh
 
 network:
 ifeq ($(DOP),docker)
