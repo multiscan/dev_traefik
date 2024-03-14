@@ -31,7 +31,7 @@ version: '3'
 
 services:
   proxy:
-    container_name: traefik
+    container_name: gctraefik
     image: traefik:v2.9
     command: --api.insecure=true --providers.docker # --configFile=/traefik.yml 
     ports:
