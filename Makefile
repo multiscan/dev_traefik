@@ -9,7 +9,7 @@ CRTDIR ?= /keybase/team/epfl_idevfsd/certs
 CERTS = $(addprefix certs/,$(DOMAINS)) $(addprefix certs/,$(MKCERT_DOMAINS))
 DYNCONFIGS = $(addprefix config/,$(addsuffix .yml,$(DOMAINS)))
 
-DOP ?= $(shell if which -s podman ; then echo "podman" ; else echo "docker" ; fi)
+DOP ?= $(shell if which podman > /dev/null; then echo "podman" ; else echo "docker" ; fi)
 
 all:
 	@echo "DOP: $(DOP)"	
