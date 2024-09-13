@@ -5,7 +5,9 @@ global:
 log:
   level: DEBUG
 
-# accesslog:
+# accessLog:
+#   filePath: "/log/access.log"
+#   format: json
 
 api:
   insecure: true

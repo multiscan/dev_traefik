@@ -1,4 +1,4 @@
-# Generic Traefik container for local development
+# Generic [Traefik][traefik] container for local development
 
 ### One traefik for all your dev apps
 
@@ -26,14 +26,25 @@ For **global domains**, we cannot use the great feature of traefik of generating
  1. Official wildcard certificates: generate a certificate for your `dev` subdomain and store it in a subdirectory of your `CRTDIR`. I do this using the procedure described [here][1] which uses Let's encrypt and works nicely (and free of charge) for domains registered with gandi.net. The list of subdomains that you want traefik to be aware of have to be listed in the `DOMAINS` environment variable. So, if the domain is `jkldsa.com`, anything like `myapp.dev.jkldsa.com` will point to localhost and reach traefik. Since the certificate is valid forr all hosts in the `*.dev.jkldsa.com`, traefik will not have to generate a new one and you will avoid complains from the browser.
  1. Use [mkcert][9] to generate cerificates on the fly for the sub-domains you intend to use. In this case, all you have to do is to list the domains in the `MKCERT_DOMAINS` environment variable. 
 
+## Requirements
+For this to work, you need to have 
+ * docker installed and running or, if you have a zen attidude, you can also try with podman.
+ * have any verion of ruby's erb preprocessor. This is needed to fix some issues
+   coming from rancher desktop on mac (at least my mac). This is probably no longer the case but I got rid of rancher desktop. Therefore, I cannot test myself.
+ * have access to a directory containing the glob ssl certificates
+   (by default /keybase/team/epfl_idevfsd/certs)
+ * eventually have the [mkcert][mkcert] utility installed
+
 ## Configuration
 
-1. provide a directory with a valid wildcard certificate and key as the `CRTDIR` env variable;
-1. provide `DOMAINS` andd `MKCERT_DOMAINS` environment variables listing the domains you want to use;
+1. copy `env.example` to `.env` and edit it to suit your needs:
+  * provide a directory with a valid wildcard certificate and key as the `CRTDIR` env variable;
+  * provide `DOMAINS` and `MKCERT_DOMAINS` environment variables listing the domains you want to use;
 1. make sure that traefik is running: `make up`;
 1. add labels and network to your app's `docker-compose.yml` file so that it can be added automatically to the list of services. See the example.
 
 ## Links
+ - [Traefik][0]
  - [Gandi & LE Certificate Generation][1]
  - [mkcert][9]
  - [Traefik 1.7 documentation][2]
@@ -43,6 +54,7 @@ For **global domains**, we cannot use the great feature of traefik of generating
  - [OpenSSL commands][7]
  - [socat man page][8]
 
+[0]: https://traefik.io/traefik/
 [1]: https://github.com/multiscan/GandiLetsEncryptCertificates
 [2]: https://docs.traefik.io/v1.7/
 [3]: https://docs.traefik.io/v2.2/

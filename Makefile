@@ -6,6 +6,8 @@ MKCERT_DOMAINS ?= local
 # KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
 # CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
 CRTDIR ?= /keybase/team/epfl_idevfsd/certs
+
+# The certs that are not found in CRTDIR, will be created with mkcert.
 CERTS = $(addprefix certs/,$(DOMAINS)) $(addprefix certs/,$(MKCERT_DOMAINS))
 DYNCONFIGS = $(addprefix config/,$(addsuffix .yml,$(DOMAINS)))
 

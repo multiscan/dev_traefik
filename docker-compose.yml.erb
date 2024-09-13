@@ -4,7 +4,6 @@ def realpath(f)
   `realpath #{f}`.chomp
 end
 DEV_DOMAIN=ENV['DEV_DOMAIN'] || 'dev.jkldsa.com'
-DOCKER_SOCKET=ENV['DOCKER_SOCKET'] || '/var/run/docker.sock'
 %>
 version: '3'
 
@@ -17,7 +16,7 @@ version: '3'
 #      traefik:
 #        external: true
 #
-# 2. attach configuration for trafick as "labels" for the application to be exposed
+# 2. attach configuration for traefik as "labels" for the application to be exposed
 #        labels:
 #          - "traefik.docker.network=traefik"
 #          - "traefik.enable=true"
@@ -41,7 +40,7 @@ services:
     networks:
       - traefik
     volumes:
-      # - <%= realpath DOCKER_SOCKET %>:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      # mount the docker socket file so that traefik will receive the labels for dynamic configuration
       - /var/run/docker.sock:/var/run/docker.sock
       - target: /traefik.yml
         source: <%= realpath "./traefik.yml" %>
@@ -49,6 +48,7 @@ services:
         type: bind
       - <%= realpath "./certs" %>:/certs
       - <%= realpath "./config" %>:/config
+      - <%= realpath "./logs" %>:/log
 
 # An external network so the same traefik can be use for different project (all sharing ports 80,443)
 # This has to be created by hand otherwise the name is not correct
