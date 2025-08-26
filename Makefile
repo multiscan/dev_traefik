@@ -1,7 +1,8 @@
 -include .env
-export
+DIR = $(shell readlink -f ./)
 DEV_DOMAIN ?= dev.jkldsa.com
-DOMAINS ?= epfl.cz dev.jkldsa.com
+export
+DOMAINS ?= dev.jkldsa.com dev.fsd.team
 MKCERT_DOMAINS ?= local
 # KEYBASE_USER ?= $(shell /usr/local/bin/keybase whoami)
 # CRTDIR ?= /keybase/private/$(KEYBASE_USER)/certbot/etc/live/
@@ -14,7 +15,8 @@ DYNCONFIGS = $(addprefix config/,$(addsuffix .yml,$(DOMAINS)))
 DOP ?= $(shell if which -s podman ; then echo "podman" ; else echo "docker" ; fi)
 
 all:
-	@echo "DOP: $(DOP)"	
+	@echo "DOP: $(DOP)"
+	@echo "DIR: $(DIR)"
 	@echo "DOMAINS: $(DOMAINS)"
 	@echo "MKCERT_DOMAINS: $(MKCERT_DOMAINS)"
 	@echo "CRTDIR: $(CRTDIR)"
@@ -36,7 +38,8 @@ ifeq ($(DOP),podman)
 else
 	docker compose down
 endif
-	rm -rf $(CERTS)
+	rm -rf $(CERTS) docker-compose.yml podman.yml config/traefik.yml
+
 
 logs:
 ifeq ($(DOP),docker)
@@ -65,7 +68,7 @@ ifeq ($(DOP),docker)
 endif
 
 $(CERTS): certs
-	src=$(CRTDIR)/$(notdir $@);\
+	@src=$(CRTDIR)/$(notdir $@);\
 	echo "src=$$src";\
 	if keybase fs stat $$src 2>/dev/null | cut -f 2 | grep -q DIR ; then \
 		if [ -d $@ ] ; then \
@@ -93,11 +96,11 @@ certs:
 config:
 	mkdir -p $@
 
-podman.yml: podman.yml.erb
-	erb -T 2 $< >$@
+podman.yml: podman.yml.env
+	cat $< | envsubst >$@
 
-docker-compose.yml: docker-compose.yml.erb
-	erb -T 2 $< >$@
+docker-compose.yml: docker-compose.yml.env
+	cat $< | envsubst >$@
 
-config/traefik.yml: service.yml.erb
-	erb -T 2 $< >$@
+config/traefik.yml: service.yml.env
+	cat $< | envsubst >$@

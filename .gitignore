@@ -1,6 +1,6 @@
 certs/
 config/
-log/
+/logs
 acme.json
 *.pem
 .env
