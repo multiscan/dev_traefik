@@ -15,6 +15,7 @@ api:
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
+    # swarmMode: false
   file:
     directory: /config
     watch: true
